@@ -84,16 +84,20 @@ def make_text(chains, n):
         text += current_key[i] + " " 
 
     # while current_key in chains.keys():
-    while len(text) < 140:
+    while len(text) < 120:
         next_word = choice(chains[current_key])
         text += " " + next_word
         adjusting_key = list(current_key)
         adjusting_key.append(next_word)
         current_key = tuple(adjusting_key[1:])
 
-    truncated_text = re.sub(r"""[.!?;"'][\sa-zA-Z_]+$""",'', text)
 
-    return truncated_text
+    truncated_text = re.sub(r"""[.!?;][\sa-zA-Z_"]+$"""," ", text)
+
+    if len(truncated_text) < 140:
+        return truncated_text
+    else:
+        return truncated_text[:-1]
 
 
 def tweet(chains):
@@ -106,10 +110,10 @@ def tweet(chains):
         access_token_key = os.environ['TWITTER_ACCESS_TOKEN_KEY'],
         access_token_secret = os.environ['TWITTER_ACCESS_TOKEN_SECRET'])
 
-    print api.VerifyCredentials()
+    api.VerifyCredentials()
 
     status = api.PostUpdate(chains)
-    print status.text
+    print status
 
 # Get the filenames from the user through a command line prompt, ex:
 # python markov.py green-eggs.txt shakespeare.txt
@@ -128,7 +132,9 @@ chains = make_chains(input_text, n_gram)
 # Produce random text
 random_text = make_text(chains, n_gram)
 
-print random_text
+generated_tweet = tweet(random_text)
+
+
 
 # Your task is to write a new function tweet, that will take chains as input
 # tweet(chains)
